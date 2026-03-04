@@ -19,72 +19,54 @@
     }
 
     /* ── Header ── */
-    .header {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      margin-bottom: 20px;
-    }
+    .header { display: flex; align-items: center; gap: 10px; margin-bottom: 20px; }
     .header-icon {
       width: 34px; height: 34px; border-radius: 9px; flex-shrink: 0;
       background: linear-gradient(135deg, #2563EB, #7C3AED);
       display: flex; align-items: center; justify-content: center;
     }
-    .header-icon svg { display: block; }
     .header-meta { font-size: 10px; font-weight: 700; letter-spacing: .09em; color: #94A3B8; text-transform: uppercase; margin-bottom: 2px; }
     .header-title { font-size: 17px; font-weight: 700; color: #0F172A; line-height: 1.2; }
 
     /* ── Summary cards ── */
-    .cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 18px; }
+    .cards { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin-bottom: 16px; }
     .card {
-      border-radius: 12px; padding: 14px 16px;
+      border-radius: 12px; padding: 12px 14px;
       border: 2px solid var(--accent);
       background: #fff; cursor: pointer;
       transition: transform .18s, box-shadow .18s;
     }
     .card:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,0,0,.09); }
     .card.active { background: var(--color); border-color: var(--color); }
-    .card-label { font-size: 10px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--color); margin-bottom: 4px; }
+    .card-label { font-size: 9px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--color); margin-bottom: 4px; }
     .card.active .card-label { color: rgba(255,255,255,.75); }
-    .card-count { font-family: 'DM Mono', monospace; font-size: 28px; font-weight: 700; color: var(--color); line-height: 1; }
+    .card-count { font-family: 'DM Mono', monospace; font-size: 24px; font-weight: 700; color: var(--color); line-height: 1; }
     .card.active .card-count { color: #fff; }
-    .card-sub { font-size: 11px; color: #64748B; margin-top: 3px; }
+    .card-sub { font-size: 10px; color: #64748B; margin-top: 3px; }
     .card.active .card-sub { color: rgba(255,255,255,.65); }
 
     /* ── Filter pills ── */
-    .filters { display: flex; gap: 7px; flex-wrap: wrap; margin-bottom: 14px; }
+    .filters { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 14px; }
     .pill {
-      padding: 6px 15px; border-radius: 999px; font-size: 12px; font-weight: 600;
+      padding: 5px 13px; border-radius: 999px; font-size: 12px; font-weight: 600;
       border: 1.5px solid #E2E8F0; background: #fff; color: #475569;
       cursor: pointer; transition: all .15s; display: flex; align-items: center; gap: 5px;
     }
     .pill:hover { border-color: #CBD5E1; background: #F1F5F9; }
-    .pill.active { background: var(--color); border-color: var(--color); color: #fff; box-shadow: 0 2px 8px rgba(0,0,0,.14); }
-    .pill-all.active { background: #0F172A; border-color: #0F172A; }
-    .badge {
-      background: #F1F5F9; color: #64748B;
-      font-size: 10px; font-weight: 700; border-radius: 999px; padding: 1px 7px;
-    }
+    .pill.active { background: var(--color, #0F172A); border-color: var(--color, #0F172A); color: #fff; box-shadow: 0 2px 8px rgba(0,0,0,.14); }
+    .badge { background: #F1F5F9; color: #64748B; font-size: 10px; font-weight: 700; border-radius: 999px; padding: 1px 7px; }
     .pill.active .badge { background: rgba(255,255,255,.25); color: #fff; }
 
     /* ── Table ── */
-    .table-wrap {
-      background: #fff; border-radius: 14px;
-      border: 1.5px solid #E2E8F0;
-      overflow: hidden; box-shadow: 0 2px 10px rgba(0,0,0,.04);
-    }
-    .thead {
-      display: grid; grid-template-columns: 38px 1fr 100px 90px 70px;
-      padding: 10px 16px; background: #F8FAFC;
-      border-bottom: 1.5px solid #E2E8F0;
-    }
+    .table-wrap { background: #fff; border-radius: 14px; border: 1.5px solid #E2E8F0; overflow: hidden; box-shadow: 0 2px 10px rgba(0,0,0,.04); }
+    .thead { display: grid; grid-template-columns: 38px 1fr 100px 90px 70px; padding: 10px 16px; background: #F8FAFC; border-bottom: 1.5px solid #E2E8F0; }
     .th { font-size: 10px; font-weight: 700; color: #94A3B8; text-transform: uppercase; letter-spacing: .08em; }
     .th:first-child { text-align: center; }
 
     .trow {
       display: grid; grid-template-columns: 38px 1fr 100px 90px 70px;
-      padding: 12px 16px; border-bottom: 1px solid #F1F5F9;
-      align-items: center; transition: background .12s, transform .1s;
+      padding: 12px 16px; border-bottom: 1px solid #F1F5F9; align-items: center;
+      transition: background .12s, transform .1s;
       animation: fadeIn .28s ease both;
     }
     .trow:last-child { border-bottom: none; }
@@ -101,10 +83,8 @@
     }
     .freq-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--color); flex-shrink: 0; }
 
-    .duty-badge {
-      border-radius: 6px; padding: 3px 9px; font-size: 11px; font-weight: 600;
-    }
-    .duty-HR   { background: #DBEAFE; color: #1D4ED8; }
+    .duty-badge { border-radius: 6px; padding: 3px 9px; font-size: 11px; font-weight: 600; }
+    .duty-HR    { background: #DBEAFE; color: #1D4ED8; }
     .duty-Admin { background: #FEF3C7; color: #92400E; }
 
     /* ── Footer ── */
@@ -113,11 +93,10 @@
       padding: 10px 16px; background: #F8FAFC; border-top: 1.5px solid #E2E8F0;
       font-size: 11px; color: #64748B; font-weight: 600; flex-wrap: wrap; gap: 6px;
     }
-    .tfoot-counts { display: flex; gap: 10px; }
+    .tfoot-counts { display: flex; gap: 10px; flex-wrap: wrap; }
     .tfoot-count { display: flex; align-items: center; gap: 4px; }
     .tfoot-dot { width: 7px; height: 7px; border-radius: 50%; }
 
-    /* ── Loading / Empty ── */
     .state-msg { padding: 40px; text-align: center; color: #94A3B8; font-size: 13px; }
 
     @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
@@ -132,48 +111,48 @@
       </svg>
     </div>
     <div>
-      <div class="header-meta" id="position-label">Job Description</div>
+      <div class="header-meta">Job Description</div>
       <div class="header-title">Frequency Summary</div>
     </div>
   </div>
 
   <!-- Summary Cards -->
   <div class="cards">
-    <div class="card" id="card-Daily"
-         style="--color:#2563EB;--accent:#BFDBFE;--bg:#EFF6FF"
-         onclick="setFilter('Daily')">
+    <div class="card" id="card-Daily"   style="--color:#2563EB;--accent:#BFDBFE;--bg:#EFF6FF" onclick="setFilter('Daily')">
       <div class="card-label">Daily</div>
       <div class="card-count" id="count-Daily">0</div>
       <div class="card-sub">tasks</div>
     </div>
-    <div class="card" id="card-Weekly"
-         style="--color:#7C3AED;--accent:#DDD6FE;--bg:#F5F3FF"
-         onclick="setFilter('Weekly')">
+    <div class="card" id="card-Weekly"  style="--color:#7C3AED;--accent:#DDD6FE;--bg:#F5F3FF" onclick="setFilter('Weekly')">
       <div class="card-label">Weekly</div>
       <div class="card-count" id="count-Weekly">0</div>
       <div class="card-sub">tasks</div>
     </div>
-    <div class="card" id="card-Monthly"
-         style="--color:#059669;--accent:#A7F3D0;--bg:#ECFDF5"
-         onclick="setFilter('Monthly')">
+    <div class="card" id="card-Monthly" style="--color:#059669;--accent:#A7F3D0;--bg:#ECFDF5" onclick="setFilter('Monthly')">
       <div class="card-label">Monthly</div>
       <div class="card-count" id="count-Monthly">0</div>
+      <div class="card-sub">tasks</div>
+    </div>
+    <div class="card" id="card-Yearly"  style="--color:#DC2626;--accent:#FECACA;--bg:#FEF2F2" onclick="setFilter('Yearly')">
+      <div class="card-label">Yearly</div>
+      <div class="card-count" id="count-Yearly">0</div>
+      <div class="card-sub">tasks</div>
+    </div>
+    <div class="card" id="card-Adhoc"   style="--color:#D97706;--accent:#FDE68A;--bg:#FFFBEB" onclick="setFilter('Adhoc')">
+      <div class="card-label">Adhoc</div>
+      <div class="card-count" id="count-Adhoc">0</div>
       <div class="card-sub">tasks</div>
     </div>
   </div>
 
   <!-- Filter Pills -->
   <div class="filters">
-    <div class="pill pill-all active" id="pill-All" onclick="setFilter('All')">All</div>
-    <div class="pill" id="pill-Daily"   style="--color:#2563EB" onclick="setFilter('Daily')">
-      Daily <span class="badge" id="badge-Daily">0</span>
-    </div>
-    <div class="pill" id="pill-Weekly"  style="--color:#7C3AED" onclick="setFilter('Weekly')">
-      Weekly <span class="badge" id="badge-Weekly">0</span>
-    </div>
-    <div class="pill" id="pill-Monthly" style="--color:#059669" onclick="setFilter('Monthly')">
-      Monthly <span class="badge" id="badge-Monthly">0</span>
-    </div>
+    <div class="pill active" id="pill-All"     style="--color:#0F172A" onclick="setFilter('All')">All</div>
+    <div class="pill"        id="pill-Daily"   style="--color:#2563EB" onclick="setFilter('Daily')">Daily <span class="badge" id="badge-Daily">0</span></div>
+    <div class="pill"        id="pill-Weekly"  style="--color:#7C3AED" onclick="setFilter('Weekly')">Weekly <span class="badge" id="badge-Weekly">0</span></div>
+    <div class="pill"        id="pill-Monthly" style="--color:#059669" onclick="setFilter('Monthly')">Monthly <span class="badge" id="badge-Monthly">0</span></div>
+    <div class="pill"        id="pill-Yearly"  style="--color:#DC2626" onclick="setFilter('Yearly')">Yearly <span class="badge" id="badge-Yearly">0</span></div>
+    <div class="pill"        id="pill-Adhoc"   style="--color:#D97706" onclick="setFilter('Adhoc')">Adhoc <span class="badge" id="badge-Adhoc">0</span></div>
   </div>
 
   <!-- Table -->
@@ -199,12 +178,15 @@
       Daily:   { color: '#2563EB', accent: '#BFDBFE', bg: '#EFF6FF' },
       Weekly:  { color: '#7C3AED', accent: '#DDD6FE', bg: '#F5F3FF' },
       Monthly: { color: '#059669', accent: '#A7F3D0', bg: '#ECFDF5' },
+      Yearly:  { color: '#DC2626', accent: '#FECACA', bg: '#FEF2F2' },
+      Adhoc:   { color: '#D97706', accent: '#FDE68A', bg: '#FFFBEB' },
     };
+
+    const ALL_FREQS = ['Daily', 'Weekly', 'Monthly', 'Yearly', 'Adhoc'];
 
     let allRecords = [];
     let activeFilter = 'All';
 
-    // ── Grist integration ──────────────────────────────────────────────
     grist.ready({ requiredAccess: 'read table' });
 
     grist.onRecords(function(records) {
@@ -213,9 +195,7 @@
       render();
     });
 
-    // ── Filter logic ───────────────────────────────────────────────────
     function setFilter(f) {
-      // toggle off if clicking active (except All)
       if (f !== 'All' && activeFilter === f) f = 'All';
       activeFilter = f;
       updatePillsAndCards();
@@ -223,7 +203,7 @@
     }
 
     function updateCounts() {
-      ['Daily', 'Weekly', 'Monthly'].forEach(f => {
+      ALL_FREQS.forEach(f => {
         const n = allRecords.filter(r => r.Frequency === f).length;
         document.getElementById('count-' + f).textContent = n;
         document.getElementById('badge-' + f).textContent = n;
@@ -231,17 +211,16 @@
     }
 
     function updatePillsAndCards() {
-      ['All', 'Daily', 'Weekly', 'Monthly'].forEach(f => {
+      ['All', ...ALL_FREQS].forEach(f => {
         const pill = document.getElementById('pill-' + f);
         if (pill) pill.classList.toggle('active', activeFilter === f);
       });
-      ['Daily', 'Weekly', 'Monthly'].forEach(f => {
+      ALL_FREQS.forEach(f => {
         const card = document.getElementById('card-' + f);
         if (card) card.classList.toggle('active', activeFilter === f);
       });
     }
 
-    // ── Render table ───────────────────────────────────────────────────
     function render() {
       const tbody = document.getElementById('tbody');
       const rows = activeFilter === 'All'
@@ -268,8 +247,7 @@
             <div class="td-desc">${esc(desc)}</div>
             <div class="td-scope">${esc(scope)}</div>
             <div>
-              <span class="freq-badge"
-                style="--color:${cfg.color};--accent:${cfg.accent};--bg:${cfg.bg}">
+              <span class="freq-badge" style="--color:${cfg.color};--accent:${cfg.accent};--bg:${cfg.bg}">
                 <span class="freq-dot"></span>${esc(freq)}
               </span>
             </div>
@@ -279,7 +257,6 @@
           </div>`;
       }).join('');
 
-      // Footer
       document.getElementById('footer-total').textContent =
         `Showing ${rows.length} of ${allRecords.length} task${allRecords.length !== 1 ? 's' : ''}`;
 
