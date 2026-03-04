@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Frequency Summary Widget</title>
+  <script src="https://docs.getgrist.com/grist-plugin-api.js"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap');
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'DM Sans', 'Segoe UI', sans-serif;
+      background: #F8FAFC;
+      color: #1E293B;
+      min-height: 100vh;
+      padding: 20px 18px;
+    }
+
+    /* ── Header ── */
+    .header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+    .header-icon {
+      width: 34px; height: 34px; border-radius: 9px; flex-shrink: 0;
+      background: linear-gradient(135deg, #2563EB, #7C3AED);
+      display: flex; align-items: center; justify-content: center;
+    }
+    .header-icon svg { display: block; }
+    .header-meta { font-size: 10px; font-weight: 700; letter-spacing: .09em; color: #94A3B8; text-transform: uppercase; margin-bottom: 2px; }
+    .header-title { font-size: 17px; font-weight: 700; color: #0F172A; line-height: 1.2; }
+
+    /* ── Summary cards ── */
+    .cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 18px; }
+    .card {
+      border-radius: 12px; padding: 14px 16px;
+      border: 2px solid var(--accent);
+      background: #fff; cursor: pointer;
+      transition: transform .18s, box-shadow .18s;
+    }
+    .card:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,0,0,.09); }
+    .card.active { background: var(--color); border-color: var(--color); }
+    .card-label { font-size: 10px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--color); margin-bottom: 4px; }
+    .card.active .card-label { color: rgba(255,255,255,.75); }
+    .card-count { font-family: 'DM Mono', monospace; font-size: 28px; font-weight: 700; color: var(--color); line-height: 1; }
+    .card.active .card-count { color: #fff; }
+    .card-sub { font-size: 11px; color: #64748B; margin-top: 3px; }
+    .card.active .card-sub { color: rgba(255,255,255,.65); }
+
+    /* ── Filter pills ── */
+    .filters { display: flex; gap: 7px; flex-wrap: wrap; margin-bottom: 14px; }
+    .pill {
+      padding: 6px 15px; border-radius: 999px; font-size: 12px; font-weight: 600;
+      border: 1.5px solid #E2E8F0; background: #fff; color: #475569;
+      cursor: pointer; transition: all .15s; display: flex; align-items: center; gap: 5px;
+    }
+    .pill:hover { border-color: #CBD5E1; background: #F1F5F9; }
+    .pill.active { background: var(--color); border-color: var(--color); color: #fff; box-shadow: 0 2px 8px rgba(0,0,0,.14); }
+    .pill-all.active { background: #0F172A; border-color: #0F172A; }
+    .badge {
+      background: #F1F5F9; color: #64748B;
+      font-size: 10px; font-weight: 700; border-radius: 999px; padding: 1px 7px;
+    }
+    .pill.active .badge { background: rgba(255,255,255,.25); color: #fff; }
+
+    /* ── Table ── */
+    .table-wrap {
+      background: #fff; border-radius: 14px;
+      border: 1.5px solid #E2E8F0;
+      overflow: hidden; box-shadow: 0 2px 10px rgba(0,0,0,.04);
+    }
+    .thead {
+      display: grid; grid-template-columns: 38px 1fr 100px 90px 70px;
+      padding: 10px 16px; background: #F8FAFC;
+      border-bottom: 1.5px solid #E2E8F0;
+    }
+    .th { font-size: 10px; font-weight: 700; color: #94A3B8; text-transform: uppercase; letter-spacing: .08em; }
+    .th:first-child { text-align: center; }
+
+    .trow {
+      display: grid; grid-template-columns: 38px 1fr 100px 90px 70px;
+      padding: 12px 16px; border-bottom: 1px solid #F1F5F9;
+      align-items: center; transition: background .12s, transform .1s;
+      animation: fadeIn .28s ease both;
+    }
+    .trow:last-child { border-bottom: none; }
+    .trow:hover { background: #F0F7FF; transform: translateX(2px); }
+
+    .td-num { font-family: 'DM Mono', monospace; font-size: 11px; color: #CBD5E1; font-weight: 500; text-align: center; }
+    .td-desc { font-size: 13px; color: #1E293B; line-height: 1.4; padding-right: 12px; }
+    .td-scope { font-size: 12px; color: #64748B; font-weight: 500; }
+
+    .freq-badge {
+      display: inline-flex; align-items: center; gap: 4px;
+      border-radius: 999px; padding: 3px 9px; font-size: 11px; font-weight: 600;
+      border: 1px solid var(--accent); background: var(--bg); color: var(--color);
+    }
+    .freq-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--color); flex-shrink: 0; }
+
+    .duty-badge {
+      border-radius: 6px; padding: 3px 9px; font-size: 11px; font-weight: 600;
+    }
+    .duty-HR   { background: #DBEAFE; color: #1D4ED8; }
+    .duty-Admin { background: #FEF3C7; color: #92400E; }
+
+    /* ── Footer ── */
+    .tfoot {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 10px 16px; background: #F8FAFC; border-top: 1.5px solid #E2E8F0;
+      font-size: 11px; color: #64748B; font-weight: 600; flex-wrap: wrap; gap: 6px;
+    }
+    .tfoot-counts { display: flex; gap: 10px; }
+    .tfoot-count { display: flex; align-items: center; gap: 4px; }
+    .tfoot-dot { width: 7px; height: 7px; border-radius: 50%; }
+
+    /* ── Loading / Empty ── */
+    .state-msg { padding: 40px; text-align: center; color: #94A3B8; font-size: 13px; }
+
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+  </style>
+</head>
+<body>
+
+  <div class="header">
+    <div class="header-icon">
+      <svg width="17" height="17" fill="none" viewBox="0 0 24 24" stroke="white" stroke-width="2.2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+      </svg>
+    </div>
+    <div>
+      <div class="header-meta" id="position-label">Job Description</div>
+      <div class="header-title">Frequency Summary</div>
+    </div>
+  </div>
+
+  <!-- Summary Cards -->
+  <div class="cards">
+    <div class="card" id="card-Daily"
+         style="--color:#2563EB;--accent:#BFDBFE;--bg:#EFF6FF"
+         onclick="setFilter('Daily')">
+      <div class="card-label">Daily</div>
+      <div class="card-count" id="count-Daily">0</div>
+      <div class="card-sub">tasks</div>
+    </div>
+    <div class="card" id="card-Weekly"
+         style="--color:#7C3AED;--accent:#DDD6FE;--bg:#F5F3FF"
+         onclick="setFilter('Weekly')">
+      <div class="card-label">Weekly</div>
+      <div class="card-count" id="count-Weekly">0</div>
+      <div class="card-sub">tasks</div>
+    </div>
+    <div class="card" id="card-Monthly"
+         style="--color:#059669;--accent:#A7F3D0;--bg:#ECFDF5"
+         onclick="setFilter('Monthly')">
+      <div class="card-label">Monthly</div>
+      <div class="card-count" id="count-Monthly">0</div>
+      <div class="card-sub">tasks</div>
+    </div>
+  </div>
+
+  <!-- Filter Pills -->
+  <div class="filters">
+    <div class="pill pill-all active" id="pill-All" onclick="setFilter('All')">All</div>
+    <div class="pill" id="pill-Daily"   style="--color:#2563EB" onclick="setFilter('Daily')">
+      Daily <span class="badge" id="badge-Daily">0</span>
+    </div>
+    <div class="pill" id="pill-Weekly"  style="--color:#7C3AED" onclick="setFilter('Weekly')">
+      Weekly <span class="badge" id="badge-Weekly">0</span>
+    </div>
+    <div class="pill" id="pill-Monthly" style="--color:#059669" onclick="setFilter('Monthly')">
+      Monthly <span class="badge" id="badge-Monthly">0</span>
+    </div>
+  </div>
+
+  <!-- Table -->
+  <div class="table-wrap">
+    <div class="thead">
+      <div class="th" style="text-align:center">#</div>
+      <div class="th">Description</div>
+      <div class="th">Scope</div>
+      <div class="th">Frequency</div>
+      <div class="th">Type</div>
+    </div>
+    <div id="tbody">
+      <div class="state-msg">Waiting for data…</div>
+    </div>
+    <div class="tfoot">
+      <span id="footer-total">0 tasks</span>
+      <div class="tfoot-counts" id="footer-counts"></div>
+    </div>
+  </div>
+
+  <script>
+    const FREQ_CFG = {
+      Daily:   { color: '#2563EB', accent: '#BFDBFE', bg: '#EFF6FF' },
+      Weekly:  { color: '#7C3AED', accent: '#DDD6FE', bg: '#F5F3FF' },
+      Monthly: { color: '#059669', accent: '#A7F3D0', bg: '#ECFDF5' },
+    };
+
+    let allRecords = [];
+    let activeFilter = 'All';
+
+    // ── Grist integration ──────────────────────────────────────────────
+    grist.ready({ requiredAccess: 'read table' });
+
+    grist.onRecords(function(records) {
+      allRecords = records;
+      updateCounts();
+      render();
+    });
+
+    // ── Filter logic ───────────────────────────────────────────────────
+    function setFilter(f) {
+      // toggle off if clicking active (except All)
+      if (f !== 'All' && activeFilter === f) f = 'All';
+      activeFilter = f;
+      updatePillsAndCards();
+      render();
+    }
+
+    function updateCounts() {
+      ['Daily', 'Weekly', 'Monthly'].forEach(f => {
+        const n = allRecords.filter(r => r.Frequency === f).length;
+        document.getElementById('count-' + f).textContent = n;
+        document.getElementById('badge-' + f).textContent = n;
+      });
+    }
+
+    function updatePillsAndCards() {
+      ['All', 'Daily', 'Weekly', 'Monthly'].forEach(f => {
+        const pill = document.getElementById('pill-' + f);
+        if (pill) pill.classList.toggle('active', activeFilter === f);
+      });
+      ['Daily', 'Weekly', 'Monthly'].forEach(f => {
+        const card = document.getElementById('card-' + f);
+        if (card) card.classList.toggle('active', activeFilter === f);
+      });
+    }
+
+    // ── Render table ───────────────────────────────────────────────────
+    function render() {
+      const tbody = document.getElementById('tbody');
+      const rows = activeFilter === 'All'
+        ? allRecords
+        : allRecords.filter(r => r.Frequency === activeFilter);
+
+      if (!rows.length) {
+        tbody.innerHTML = '<div class="state-msg">No records found.</div>';
+        document.getElementById('footer-total').textContent = '0 tasks';
+        document.getElementById('footer-counts').innerHTML = '';
+        return;
+      }
+
+      tbody.innerHTML = rows.map((r, i) => {
+        const freq  = r.Frequency || '';
+        const scope = r.Scope || '';
+        const desc  = r.Description || '';
+        const duty  = r.Duty_Type || r.DutyType || r['Duty Type'] || '';
+        const cfg   = FREQ_CFG[freq] || { color: '#64748B', accent: '#E2E8F0', bg: '#F8FAFC' };
+
+        return `
+          <div class="trow" style="animation-delay:${i * 0.03}s">
+            <div class="td-num">${String(i + 1).padStart(2, '0')}</div>
+            <div class="td-desc">${esc(desc)}</div>
+            <div class="td-scope">${esc(scope)}</div>
+            <div>
+              <span class="freq-badge"
+                style="--color:${cfg.color};--accent:${cfg.accent};--bg:${cfg.bg}">
+                <span class="freq-dot"></span>${esc(freq)}
+              </span>
+            </div>
+            <div>
+              <span class="duty-badge duty-${esc(duty)}">${esc(duty)}</span>
+            </div>
+          </div>`;
+      }).join('');
+
+      // Footer
+      document.getElementById('footer-total').textContent =
+        `Showing ${rows.length} of ${allRecords.length} task${allRecords.length !== 1 ? 's' : ''}`;
+
+      const countMap = {};
+      rows.forEach(r => { if (r.Frequency) countMap[r.Frequency] = (countMap[r.Frequency] || 0) + 1; });
+      document.getElementById('footer-counts').innerHTML =
+        Object.entries(countMap).map(([f, n]) => {
+          const c = (FREQ_CFG[f] || {}).color || '#64748B';
+          return `<span class="tfoot-count">
+            <span class="tfoot-dot" style="background:${c}"></span>
+            <span style="color:${c}">${f}: ${n}</span>
+          </span>`;
+        }).join('');
+    }
+
+    function esc(s) {
+      return String(s ?? '')
+        .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    }
+  </script>
+</body>
+</html>
