@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Frequency Summary Widget</title>
   <script src="https://docs.getgrist.com/grist-plugin-api.js"></script>
-  <!-- SheetJS for Excel export -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap');
@@ -20,7 +19,6 @@
       padding: 20px 18px;
     }
 
-    /* ── Header ── */
     .header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
     .header-left { display: flex; align-items: center; gap: 10px; }
     .header-icon {
@@ -30,27 +28,28 @@
     }
     .header-meta { font-size: 10px; font-weight: 700; letter-spacing: .09em; color: #94A3B8; text-transform: uppercase; margin-bottom: 2px; }
     .header-title { font-size: 17px; font-weight: 700; color: #0F172A; line-height: 1.2; }
+    /* position badge shown in header */
+    .position-tag {
+      display: inline-block; margin-top: 3px;
+      background: #F1F5F9; color: #475569; border-radius: 6px;
+      padding: 2px 8px; font-size: 11px; font-weight: 600;
+    }
 
-    /* ── Download button ── */
     .download-btn {
       display: flex; align-items: center; gap: 6px;
       padding: 7px 14px; border-radius: 8px; border: none; cursor: pointer;
       font-family: 'DM Sans', sans-serif; font-size: 12px; font-weight: 600;
       background: #1D6F42; color: #fff;
       transition: background .15s, transform .1s, box-shadow .15s;
-      box-shadow: 0 2px 6px rgba(0,0,0,.15);
-      white-space: nowrap;
+      box-shadow: 0 2px 6px rgba(0,0,0,.15); white-space: nowrap;
     }
     .download-btn:hover { background: #155734; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,0,0,.2); }
     .download-btn:active { transform: translateY(0); }
 
-    /* ── Summary cards ── */
     .cards { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin-bottom: 16px; }
     .card {
-      border-radius: 12px; padding: 12px 14px;
-      border: 2px solid var(--accent);
-      background: #fff; cursor: pointer;
-      transition: transform .18s, box-shadow .18s;
+      border-radius: 12px; padding: 12px 14px; border: 2px solid var(--accent);
+      background: #fff; cursor: pointer; transition: transform .18s, box-shadow .18s;
     }
     .card:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,0,0,.09); }
     .card.active { background: var(--color); border-color: var(--color); }
@@ -61,7 +60,6 @@
     .card-sub { font-size: 10px; color: #64748B; margin-top: 3px; }
     .card.active .card-sub { color: rgba(255,255,255,.65); }
 
-    /* ── Filter pills ── */
     .filters { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 14px; }
     .pill {
       padding: 5px 13px; border-radius: 999px; font-size: 12px; font-weight: 600;
@@ -73,7 +71,6 @@
     .badge { background: #F1F5F9; color: #64748B; font-size: 10px; font-weight: 700; border-radius: 999px; padding: 1px 7px; }
     .pill.active .badge { background: rgba(255,255,255,.25); color: #fff; }
 
-    /* ── Table ── */
     .table-wrap { background: #fff; border-radius: 14px; border: 1.5px solid #E2E8F0; overflow: hidden; box-shadow: 0 2px 10px rgba(0,0,0,.04); }
     .thead { display: grid; grid-template-columns: 28px 38px 1fr 100px 90px 70px; padding: 10px 16px; background: #F8FAFC; border-bottom: 1.5px solid #E2E8F0; align-items: center; }
     .th { font-size: 10px; font-weight: 700; color: #94A3B8; text-transform: uppercase; letter-spacing: .08em; }
@@ -82,9 +79,7 @@
     .trow {
       display: grid; grid-template-columns: 28px 38px 1fr 100px 90px 70px;
       padding: 12px 16px; border-bottom: 1px solid #F1F5F9; align-items: center;
-      transition: background .12s, transform .1s;
-      animation: fadeIn .28s ease both;
-      cursor: pointer;
+      transition: background .12s, transform .1s; animation: fadeIn .28s ease both; cursor: pointer;
     }
     .trow:last-child { border-bottom: none; }
     .trow:hover { background: #F0F7FF; transform: translateX(2px); }
@@ -93,14 +88,12 @@
 
     .row-check {
       width: 15px; height: 15px; border-radius: 4px; border: 1.5px solid #CBD5E1;
-      background: #fff; display: flex; align-items: center; justify-content: center;
-      flex-shrink: 0; transition: all .12s;
+      background: #fff; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: all .12s;
     }
     .trow.selected .row-check { background: #2563EB; border-color: #2563EB; }
     .check-all {
       width: 15px; height: 15px; border-radius: 4px; border: 1.5px solid #CBD5E1;
-      background: #fff; cursor: pointer; display: flex; align-items: center; justify-content: center;
-      transition: all .12s;
+      background: #fff; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all .12s;
     }
     .check-all.checked { background: #2563EB; border-color: #2563EB; }
 
@@ -119,7 +112,6 @@
     .duty-HR    { background: #DBEAFE; color: #1D4ED8; }
     .duty-Admin { background: #FEF3C7; color: #92400E; }
 
-    /* ── Footer ── */
     .tfoot {
       display: flex; justify-content: space-between; align-items: center;
       padding: 10px 16px; background: #F8FAFC; border-top: 1.5px solid #E2E8F0;
@@ -129,7 +121,6 @@
     .tfoot-count { display: flex; align-items: center; gap: 4px; }
     .tfoot-dot { width: 7px; height: 7px; border-radius: 50%; }
 
-    /* selection bar */
     .sel-bar {
       display: none; align-items: center; justify-content: space-between;
       padding: 7px 16px; background: #EFF6FF; border-bottom: 1px solid #BFDBFE;
@@ -154,7 +145,6 @@
 </head>
 <body>
 
-  <!-- Header -->
   <div class="header">
     <div class="header-left">
       <div class="header-icon">
@@ -165,10 +155,9 @@
       <div>
         <div class="header-meta">Job Description</div>
         <div class="header-title">Frequency Summary</div>
+        <div class="position-tag" id="position-tag">All Positions</div>
       </div>
     </div>
-
-    <!-- Excel download button -->
     <button class="download-btn" id="main-dl-btn" onclick="downloadExcel('current')">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
         <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5 5 5-5M12 15V3"/>
@@ -177,7 +166,6 @@
     </button>
   </div>
 
-  <!-- Summary Cards -->
   <div class="cards">
     <div class="card" id="card-Daily"   style="--color:#2563EB;--accent:#BFDBFE;--bg:#EFF6FF" onclick="setFilter('Daily')">
       <div class="card-label">Daily</div><div class="card-count" id="count-Daily">0</div><div class="card-sub">tasks</div>
@@ -196,7 +184,6 @@
     </div>
   </div>
 
-  <!-- Filter Pills -->
   <div class="filters">
     <div class="pill active" id="pill-All"     style="--color:#0F172A" onclick="setFilter('All')">All</div>
     <div class="pill"        id="pill-Daily"   style="--color:#2563EB" onclick="setFilter('Daily')">Daily <span class="badge" id="badge-Daily">0</span></div>
@@ -206,10 +193,7 @@
     <div class="pill"        id="pill-Adhoc"   style="--color:#D97706" onclick="setFilter('Adhoc')">Adhoc <span class="badge" id="badge-Adhoc">0</span></div>
   </div>
 
-  <!-- Table -->
   <div class="table-wrap">
-
-    <!-- Selection bar -->
     <div class="sel-bar" id="sel-bar">
       <span id="sel-label">0 rows selected</span>
       <div class="sel-bar-actions">
@@ -248,16 +232,39 @@
     };
     const ALL_FREQS = ['Daily', 'Weekly', 'Monthly', 'Yearly', 'Adhoc'];
 
-    let allRecords = [];
+    let allRecords  = [];
     let activeFilter = 'All';
-    let selectedIds = new Set();
+    let selectedIds  = new Set();
+    let currentPosition = ''; // from linked row
 
+    // ── Grist hooks ───────────────────────────────────────────────────
     grist.ready({ requiredAccess: 'read table' });
+
+    // All records in the table
     grist.onRecords(function(records) {
       allRecords = records;
       selectedIds.clear();
       updateCounts();
       render();
+    });
+
+    // Currently selected/linked row from the Position table on the left
+    grist.onRecord(function(record) {
+      if (!record) { currentPosition = ''; }
+      else {
+        // Try common column name variations for the position name
+        currentPosition =
+          record.Position ||
+          record.position ||
+          record.Name     ||
+          record.name     ||
+          record.Title    ||
+          record.title    ||
+          '';
+      }
+      // Update the position tag in the header
+      const tag = document.getElementById('position-tag');
+      tag.textContent = currentPosition || 'All Positions';
     });
 
     // ── Filter ────────────────────────────────────────────────────────
@@ -333,16 +340,18 @@
         const cb = el.querySelector('.row-check');
         if (cb) cb.innerHTML = sel ? CHECK_SVG : '';
       });
-
-      const btn = document.getElementById('main-dl-btn');
-      btn.innerHTML = `
-        <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5 5 5-5M12 15V3"/>
-        </svg>
-        Download Excel`;
     }
 
-    // ── Excel Export (SheetJS) ────────────────────────────────────────
+    // ── Excel filename helper ─────────────────────────────────────────
+    function buildFilename(mode) {
+      // Sanitise position name: replace spaces/special chars with hyphens
+      const pos   = (currentPosition || 'position').replace(/[^a-zA-Z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+      const freq  = activeFilter === 'All' ? 'all' : activeFilter.toLowerCase();
+      const suffix = mode === 'selected' ? 'selected' : 'current';
+      return `${pos}-job-description-${freq}-${suffix}.xlsx`;
+    }
+
+    // ── Excel Export ──────────────────────────────────────────────────
     function downloadExcel(mode) {
       const rows = getVisibleRows();
       const toExport = mode === 'selected'
@@ -351,9 +360,9 @@
 
       if (!toExport.length) return;
 
-      // Build data array
       const data = toExport.map((r, i) => ({
         '#':           i + 1,
+        'Position':    currentPosition || '',
         'Description': r.Description || '',
         'Scope':       r.Scope || '',
         'Frequency':   r.Frequency || '',
@@ -363,16 +372,16 @@
       const wb = XLSX.utils.book_new();
       const ws = XLSX.utils.json_to_sheet(data);
 
-      // Column widths
       ws['!cols'] = [
-        { wch: 4 },   // #
-        { wch: 70 },  // Description
+        { wch: 4  },  // #
+        { wch: 28 },  // Position
+        { wch: 68 },  // Description
         { wch: 18 },  // Scope
         { wch: 12 },  // Frequency
         { wch: 12 },  // Duty Type
       ];
 
-      // Style header row bold (SheetJS community edition supports basic styles)
+      // Bold header row
       const range = XLSX.utils.decode_range(ws['!ref']);
       for (let C = range.s.c; C <= range.e.c; C++) {
         const cell = ws[XLSX.utils.encode_cell({ r: 0, c: C })];
@@ -385,11 +394,9 @@
         }
       }
 
-      const label = activeFilter === 'All' ? 'All' : activeFilter;
-      XLSX.utils.book_append_sheet(wb, ws, label);
-
-      const filename = `job-description-${label.toLowerCase()}-${mode}.xlsx`;
-      XLSX.writeFile(wb, filename);
+      const sheetName = (currentPosition || 'Tasks').substring(0, 31); // Excel sheet name max 31 chars
+      XLSX.utils.book_append_sheet(wb, ws, sheetName);
+      XLSX.writeFile(wb, buildFilename(mode));
 
       // Flash button green
       const btn = mode === 'selected'
