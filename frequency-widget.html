@@ -5,6 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Frequency Summary Widget</title>
   <script src="https://docs.getgrist.com/grist-plugin-api.js"></script>
+  <!-- SheetJS for Excel export -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap');
 
@@ -19,7 +21,8 @@
     }
 
     /* ── Header ── */
-    .header { display: flex; align-items: center; gap: 10px; margin-bottom: 20px; }
+    .header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+    .header-left { display: flex; align-items: center; gap: 10px; }
     .header-icon {
       width: 34px; height: 34px; border-radius: 9px; flex-shrink: 0;
       background: linear-gradient(135deg, #2563EB, #7C3AED);
@@ -27,6 +30,19 @@
     }
     .header-meta { font-size: 10px; font-weight: 700; letter-spacing: .09em; color: #94A3B8; text-transform: uppercase; margin-bottom: 2px; }
     .header-title { font-size: 17px; font-weight: 700; color: #0F172A; line-height: 1.2; }
+
+    /* ── Download button ── */
+    .download-btn {
+      display: flex; align-items: center; gap: 6px;
+      padding: 7px 14px; border-radius: 8px; border: none; cursor: pointer;
+      font-family: 'DM Sans', sans-serif; font-size: 12px; font-weight: 600;
+      background: #1D6F42; color: #fff;
+      transition: background .15s, transform .1s, box-shadow .15s;
+      box-shadow: 0 2px 6px rgba(0,0,0,.15);
+      white-space: nowrap;
+    }
+    .download-btn:hover { background: #155734; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,0,0,.2); }
+    .download-btn:active { transform: translateY(0); }
 
     /* ── Summary cards ── */
     .cards { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin-bottom: 16px; }
@@ -59,18 +75,34 @@
 
     /* ── Table ── */
     .table-wrap { background: #fff; border-radius: 14px; border: 1.5px solid #E2E8F0; overflow: hidden; box-shadow: 0 2px 10px rgba(0,0,0,.04); }
-    .thead { display: grid; grid-template-columns: 38px 1fr 100px 90px 70px; padding: 10px 16px; background: #F8FAFC; border-bottom: 1.5px solid #E2E8F0; }
+    .thead { display: grid; grid-template-columns: 28px 38px 1fr 100px 90px 70px; padding: 10px 16px; background: #F8FAFC; border-bottom: 1.5px solid #E2E8F0; align-items: center; }
     .th { font-size: 10px; font-weight: 700; color: #94A3B8; text-transform: uppercase; letter-spacing: .08em; }
-    .th:first-child { text-align: center; }
+    .th.center { text-align: center; }
 
     .trow {
-      display: grid; grid-template-columns: 38px 1fr 100px 90px 70px;
+      display: grid; grid-template-columns: 28px 38px 1fr 100px 90px 70px;
       padding: 12px 16px; border-bottom: 1px solid #F1F5F9; align-items: center;
       transition: background .12s, transform .1s;
       animation: fadeIn .28s ease both;
+      cursor: pointer;
     }
     .trow:last-child { border-bottom: none; }
     .trow:hover { background: #F0F7FF; transform: translateX(2px); }
+    .trow.selected { background: #EFF6FF; }
+    .trow.selected:hover { background: #DBEAFE; }
+
+    .row-check {
+      width: 15px; height: 15px; border-radius: 4px; border: 1.5px solid #CBD5E1;
+      background: #fff; display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0; transition: all .12s;
+    }
+    .trow.selected .row-check { background: #2563EB; border-color: #2563EB; }
+    .check-all {
+      width: 15px; height: 15px; border-radius: 4px; border: 1.5px solid #CBD5E1;
+      background: #fff; cursor: pointer; display: flex; align-items: center; justify-content: center;
+      transition: all .12s;
+    }
+    .check-all.checked { background: #2563EB; border-color: #2563EB; }
 
     .td-num { font-family: 'DM Mono', monospace; font-size: 11px; color: #CBD5E1; font-weight: 500; text-align: center; }
     .td-desc { font-size: 13px; color: #1E293B; line-height: 1.4; padding-right: 12px; }
@@ -97,6 +129,24 @@
     .tfoot-count { display: flex; align-items: center; gap: 4px; }
     .tfoot-dot { width: 7px; height: 7px; border-radius: 50%; }
 
+    /* selection bar */
+    .sel-bar {
+      display: none; align-items: center; justify-content: space-between;
+      padding: 7px 16px; background: #EFF6FF; border-bottom: 1px solid #BFDBFE;
+      font-size: 12px; color: #1D4ED8; font-weight: 600;
+    }
+    .sel-bar.visible { display: flex; }
+    .sel-bar-actions { display: flex; gap: 8px; align-items: center; }
+    .sel-clear { font-size: 11px; color: #64748B; cursor: pointer; font-weight: 500; }
+    .sel-clear:hover { color: #0F172A; text-decoration: underline; }
+    .sel-dl-btn {
+      display: flex; align-items: center; gap: 5px;
+      padding: 4px 11px; border-radius: 6px; border: none; cursor: pointer;
+      font-family: 'DM Sans', sans-serif; font-size: 11px; font-weight: 700;
+      background: #1D6F42; color: #fff; transition: background .15s;
+    }
+    .sel-dl-btn:hover { background: #155734; }
+
     .state-msg { padding: 40px; text-align: center; color: #94A3B8; font-size: 13px; }
 
     @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
@@ -104,44 +154,45 @@
 </head>
 <body>
 
+  <!-- Header -->
   <div class="header">
-    <div class="header-icon">
-      <svg width="17" height="17" fill="none" viewBox="0 0 24 24" stroke="white" stroke-width="2.2">
-        <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+    <div class="header-left">
+      <div class="header-icon">
+        <svg width="17" height="17" fill="none" viewBox="0 0 24 24" stroke="white" stroke-width="2.2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+        </svg>
+      </div>
+      <div>
+        <div class="header-meta">Job Description</div>
+        <div class="header-title">Frequency Summary</div>
+      </div>
+    </div>
+
+    <!-- Excel download button -->
+    <button class="download-btn" id="main-dl-btn" onclick="downloadExcel('current')">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5 5 5-5M12 15V3"/>
       </svg>
-    </div>
-    <div>
-      <div class="header-meta">Job Description</div>
-      <div class="header-title">Frequency Summary</div>
-    </div>
+      Download Excel
+    </button>
   </div>
 
   <!-- Summary Cards -->
   <div class="cards">
     <div class="card" id="card-Daily"   style="--color:#2563EB;--accent:#BFDBFE;--bg:#EFF6FF" onclick="setFilter('Daily')">
-      <div class="card-label">Daily</div>
-      <div class="card-count" id="count-Daily">0</div>
-      <div class="card-sub">tasks</div>
+      <div class="card-label">Daily</div><div class="card-count" id="count-Daily">0</div><div class="card-sub">tasks</div>
     </div>
     <div class="card" id="card-Weekly"  style="--color:#7C3AED;--accent:#DDD6FE;--bg:#F5F3FF" onclick="setFilter('Weekly')">
-      <div class="card-label">Weekly</div>
-      <div class="card-count" id="count-Weekly">0</div>
-      <div class="card-sub">tasks</div>
+      <div class="card-label">Weekly</div><div class="card-count" id="count-Weekly">0</div><div class="card-sub">tasks</div>
     </div>
     <div class="card" id="card-Monthly" style="--color:#059669;--accent:#A7F3D0;--bg:#ECFDF5" onclick="setFilter('Monthly')">
-      <div class="card-label">Monthly</div>
-      <div class="card-count" id="count-Monthly">0</div>
-      <div class="card-sub">tasks</div>
+      <div class="card-label">Monthly</div><div class="card-count" id="count-Monthly">0</div><div class="card-sub">tasks</div>
     </div>
     <div class="card" id="card-Yearly"  style="--color:#DC2626;--accent:#FECACA;--bg:#FEF2F2" onclick="setFilter('Yearly')">
-      <div class="card-label">Yearly</div>
-      <div class="card-count" id="count-Yearly">0</div>
-      <div class="card-sub">tasks</div>
+      <div class="card-label">Yearly</div><div class="card-count" id="count-Yearly">0</div><div class="card-sub">tasks</div>
     </div>
     <div class="card" id="card-Adhoc"   style="--color:#D97706;--accent:#FDE68A;--bg:#FFFBEB" onclick="setFilter('Adhoc')">
-      <div class="card-label">Adhoc</div>
-      <div class="card-count" id="count-Adhoc">0</div>
-      <div class="card-sub">tasks</div>
+      <div class="card-label">Adhoc</div><div class="card-count" id="count-Adhoc">0</div><div class="card-sub">tasks</div>
     </div>
   </div>
 
@@ -157,16 +208,30 @@
 
   <!-- Table -->
   <div class="table-wrap">
+
+    <!-- Selection bar -->
+    <div class="sel-bar" id="sel-bar">
+      <span id="sel-label">0 rows selected</span>
+      <div class="sel-bar-actions">
+        <span class="sel-clear" onclick="clearSelection()">Clear selection</span>
+        <button class="sel-dl-btn" onclick="downloadExcel('selected')">
+          <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5 5 5-5M12 15V3"/>
+          </svg>
+          Download Selected
+        </button>
+      </div>
+    </div>
+
     <div class="thead">
-      <div class="th" style="text-align:center">#</div>
+      <div class="check-all" id="check-all" onclick="toggleSelectAll()"></div>
+      <div class="th center">#</div>
       <div class="th">Description</div>
       <div class="th">Scope</div>
       <div class="th">Frequency</div>
       <div class="th">Type</div>
     </div>
-    <div id="tbody">
-      <div class="state-msg">Waiting for data…</div>
-    </div>
+    <div id="tbody"><div class="state-msg">Waiting for data…</div></div>
     <div class="tfoot">
       <span id="footer-total">0 tasks</span>
       <div class="tfoot-counts" id="footer-counts"></div>
@@ -181,25 +246,31 @@
       Yearly:  { color: '#DC2626', accent: '#FECACA', bg: '#FEF2F2' },
       Adhoc:   { color: '#D97706', accent: '#FDE68A', bg: '#FFFBEB' },
     };
-
     const ALL_FREQS = ['Daily', 'Weekly', 'Monthly', 'Yearly', 'Adhoc'];
 
     let allRecords = [];
     let activeFilter = 'All';
+    let selectedIds = new Set();
 
     grist.ready({ requiredAccess: 'read table' });
-
     grist.onRecords(function(records) {
       allRecords = records;
+      selectedIds.clear();
       updateCounts();
       render();
     });
 
+    // ── Filter ────────────────────────────────────────────────────────
     function setFilter(f) {
       if (f !== 'All' && activeFilter === f) f = 'All';
       activeFilter = f;
+      selectedIds.clear();
       updatePillsAndCards();
       render();
+    }
+
+    function getVisibleRows() {
+      return activeFilter === 'All' ? allRecords : allRecords.filter(r => r.Frequency === activeFilter);
     }
 
     function updateCounts() {
@@ -221,39 +292,148 @@
       });
     }
 
+    // ── Selection ─────────────────────────────────────────────────────
+    function toggleRow(id) {
+      if (selectedIds.has(id)) selectedIds.delete(id);
+      else selectedIds.add(id);
+      updateSelectionUI();
+    }
+
+    function toggleSelectAll() {
+      const rows = getVisibleRows();
+      const allSelected = rows.every(r => selectedIds.has(r.id));
+      if (allSelected) rows.forEach(r => selectedIds.delete(r.id));
+      else rows.forEach(r => selectedIds.add(r.id));
+      updateSelectionUI();
+    }
+
+    function clearSelection() {
+      selectedIds.clear();
+      updateSelectionUI();
+    }
+
+    const CHECK_SVG = `<svg width="9" height="9" fill="none" viewBox="0 0 24 24" stroke="white" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>`;
+
+    function updateSelectionUI() {
+      const rows  = getVisibleRows();
+      const count = selectedIds.size;
+
+      document.getElementById('sel-bar').classList.toggle('visible', count > 0);
+      document.getElementById('sel-label').textContent = `${count} row${count !== 1 ? 's' : ''} selected`;
+
+      const allSel = rows.length > 0 && rows.every(r => selectedIds.has(r.id));
+      const ca = document.getElementById('check-all');
+      ca.classList.toggle('checked', allSel);
+      ca.innerHTML = allSel ? CHECK_SVG : '';
+
+      document.querySelectorAll('.trow').forEach(el => {
+        const id  = Number(el.dataset.id);
+        const sel = selectedIds.has(id);
+        el.classList.toggle('selected', sel);
+        const cb = el.querySelector('.row-check');
+        if (cb) cb.innerHTML = sel ? CHECK_SVG : '';
+      });
+
+      const btn = document.getElementById('main-dl-btn');
+      btn.innerHTML = `
+        <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5 5 5-5M12 15V3"/>
+        </svg>
+        Download Excel`;
+    }
+
+    // ── Excel Export (SheetJS) ────────────────────────────────────────
+    function downloadExcel(mode) {
+      const rows = getVisibleRows();
+      const toExport = mode === 'selected'
+        ? rows.filter(r => selectedIds.has(r.id))
+        : rows;
+
+      if (!toExport.length) return;
+
+      // Build data array
+      const data = toExport.map((r, i) => ({
+        '#':           i + 1,
+        'Description': r.Description || '',
+        'Scope':       r.Scope || '',
+        'Frequency':   r.Frequency || '',
+        'Duty Type':   r.Duty_Type || r.DutyType || r['Duty Type'] || '',
+      }));
+
+      const wb = XLSX.utils.book_new();
+      const ws = XLSX.utils.json_to_sheet(data);
+
+      // Column widths
+      ws['!cols'] = [
+        { wch: 4 },   // #
+        { wch: 70 },  // Description
+        { wch: 18 },  // Scope
+        { wch: 12 },  // Frequency
+        { wch: 12 },  // Duty Type
+      ];
+
+      // Style header row bold (SheetJS community edition supports basic styles)
+      const range = XLSX.utils.decode_range(ws['!ref']);
+      for (let C = range.s.c; C <= range.e.c; C++) {
+        const cell = ws[XLSX.utils.encode_cell({ r: 0, c: C })];
+        if (cell) {
+          cell.s = {
+            font: { bold: true, color: { rgb: 'FFFFFF' } },
+            fill: { fgColor: { rgb: '1E293B' } },
+            alignment: { horizontal: 'center' }
+          };
+        }
+      }
+
+      const label = activeFilter === 'All' ? 'All' : activeFilter;
+      XLSX.utils.book_append_sheet(wb, ws, label);
+
+      const filename = `job-description-${label.toLowerCase()}-${mode}.xlsx`;
+      XLSX.writeFile(wb, filename);
+
+      // Flash button green
+      const btn = mode === 'selected'
+        ? document.querySelector('.sel-dl-btn')
+        : document.getElementById('main-dl-btn');
+      if (btn) {
+        const orig = btn.style.background;
+        btn.style.background = '#059669';
+        setTimeout(() => btn.style.background = orig, 1200);
+      }
+    }
+
+    // ── Render ────────────────────────────────────────────────────────
     function render() {
       const tbody = document.getElementById('tbody');
-      const rows = activeFilter === 'All'
-        ? allRecords
-        : allRecords.filter(r => r.Frequency === activeFilter);
+      const rows  = getVisibleRows();
 
       if (!rows.length) {
         tbody.innerHTML = '<div class="state-msg">No records found.</div>';
         document.getElementById('footer-total').textContent = '0 tasks';
         document.getElementById('footer-counts').innerHTML = '';
+        updateSelectionUI();
         return;
       }
 
       tbody.innerHTML = rows.map((r, i) => {
-        const freq  = r.Frequency || '';
-        const scope = r.Scope || '';
-        const desc  = r.Description || '';
-        const duty  = r.Duty_Type || r.DutyType || r['Duty Type'] || '';
-        const cfg   = FREQ_CFG[freq] || { color: '#64748B', accent: '#E2E8F0', bg: '#F8FAFC' };
+        const freq = r.Frequency || '';
+        const cfg  = FREQ_CFG[freq] || { color: '#64748B', accent: '#E2E8F0', bg: '#F8FAFC' };
+        const duty = r.Duty_Type || r.DutyType || r['Duty Type'] || '';
+        const sel  = selectedIds.has(r.id);
 
         return `
-          <div class="trow" style="animation-delay:${i * 0.03}s">
+          <div class="trow${sel ? ' selected' : ''}" data-id="${r.id}"
+               style="animation-delay:${i * 0.03}s" onclick="toggleRow(${r.id})">
+            <div class="row-check">${sel ? CHECK_SVG : ''}</div>
             <div class="td-num">${String(i + 1).padStart(2, '0')}</div>
-            <div class="td-desc">${esc(desc)}</div>
-            <div class="td-scope">${esc(scope)}</div>
+            <div class="td-desc">${esc(r.Description || '')}</div>
+            <div class="td-scope">${esc(r.Scope || '')}</div>
             <div>
               <span class="freq-badge" style="--color:${cfg.color};--accent:${cfg.accent};--bg:${cfg.bg}">
                 <span class="freq-dot"></span>${esc(freq)}
               </span>
             </div>
-            <div>
-              <span class="duty-badge duty-${esc(duty)}">${esc(duty)}</span>
-            </div>
+            <div><span class="duty-badge duty-${esc(duty)}">${esc(duty)}</span></div>
           </div>`;
       }).join('');
 
@@ -270,6 +450,8 @@
             <span style="color:${c}">${f}: ${n}</span>
           </span>`;
         }).join('');
+
+      updateSelectionUI();
     }
 
     function esc(s) {
