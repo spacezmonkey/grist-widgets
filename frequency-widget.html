@@ -19,6 +19,7 @@
       padding: 20px 18px;
     }
 
+    /* ── Header ── */
     .header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
     .header-left { display: flex; align-items: center; gap: 10px; }
     .header-icon {
@@ -28,7 +29,6 @@
     }
     .header-meta { font-size: 10px; font-weight: 700; letter-spacing: .09em; color: #94A3B8; text-transform: uppercase; margin-bottom: 2px; }
     .header-title { font-size: 17px; font-weight: 700; color: #0F172A; line-height: 1.2; }
-    /* position badge shown in header */
     .position-tag {
       display: inline-block; margin-top: 3px;
       background: #F1F5F9; color: #475569; border-radius: 6px;
@@ -46,13 +46,46 @@
     .download-btn:hover { background: #155734; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,0,0,.2); }
     .download-btn:active { transform: translateY(0); }
 
-    .cards { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin-bottom: 16px; }
+    /* ── Cards row: All + 5 frequency cards ── */
+    .cards-row {
+      display: grid;
+      grid-template-columns: 1.4fr repeat(5, 1fr);
+      gap: 8px;
+      margin-bottom: 18px;
+    }
+
     .card {
-      border-radius: 12px; padding: 12px 14px; border: 2px solid var(--accent);
-      background: #fff; cursor: pointer; transition: transform .18s, box-shadow .18s;
+      border-radius: 12px; padding: 14px 16px;
+      border: 2px solid var(--accent);
+      background: #fff; cursor: pointer;
+      transition: transform .18s, box-shadow .18s;
     }
     .card:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,0,0,.09); }
     .card.active { background: var(--color); border-color: var(--color); }
+
+    /* ALL card specific */
+    .card-all {
+      display: flex; flex-direction: column; justify-content: center;
+      border-radius: 12px; padding: 14px 20px;
+      border: 2px solid #CBD5E1;
+      background: #fff; cursor: pointer;
+      transition: transform .18s, box-shadow .18s;
+    }
+    .card-all:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,0,0,.09); }
+    .card-all.active { background: #0F172A; border-color: #0F172A; }
+    .card-all-label {
+      font-size: 10px; font-weight: 700; letter-spacing: .09em;
+      text-transform: uppercase; color: #94A3B8; margin-bottom: 4px;
+    }
+    .card-all.active .card-all-label { color: rgba(255,255,255,.6); }
+    .card-all-count {
+      font-family: 'DM Mono', monospace; font-size: 30px; font-weight: 700;
+      color: #0F172A; line-height: 1;
+    }
+    .card-all.active .card-all-count { color: #fff; }
+    .card-all-sub { font-size: 10px; color: #94A3B8; margin-top: 3px; }
+    .card-all.active .card-all-sub { color: rgba(255,255,255,.5); }
+
     .card-label { font-size: 9px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--color); margin-bottom: 4px; }
     .card.active .card-label { color: rgba(255,255,255,.75); }
     .card-count { font-family: 'DM Mono', monospace; font-size: 24px; font-weight: 700; color: var(--color); line-height: 1; }
@@ -60,24 +93,14 @@
     .card-sub { font-size: 10px; color: #64748B; margin-top: 3px; }
     .card.active .card-sub { color: rgba(255,255,255,.65); }
 
-    .filters { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 14px; }
-    .pill {
-      padding: 5px 13px; border-radius: 999px; font-size: 12px; font-weight: 600;
-      border: 1.5px solid #E2E8F0; background: #fff; color: #475569;
-      cursor: pointer; transition: all .15s; display: flex; align-items: center; gap: 5px;
-    }
-    .pill:hover { border-color: #CBD5E1; background: #F1F5F9; }
-    .pill.active { background: var(--color, #0F172A); border-color: var(--color, #0F172A); color: #fff; box-shadow: 0 2px 8px rgba(0,0,0,.14); }
-    .badge { background: #F1F5F9; color: #64748B; font-size: 10px; font-weight: 700; border-radius: 999px; padding: 1px 7px; }
-    .pill.active .badge { background: rgba(255,255,255,.25); color: #fff; }
-
+    /* ── Table ── */
     .table-wrap { background: #fff; border-radius: 14px; border: 1.5px solid #E2E8F0; overflow: hidden; box-shadow: 0 2px 10px rgba(0,0,0,.04); }
-    .thead { display: grid; grid-template-columns: 28px 38px 1fr 100px 90px 70px; padding: 10px 16px; background: #F8FAFC; border-bottom: 1.5px solid #E2E8F0; align-items: center; }
+    .thead { display: grid; grid-template-columns: 28px 38px 1fr 120px 90px 70px; padding: 10px 16px; background: #F8FAFC; border-bottom: 1.5px solid #E2E8F0; align-items: center; }
     .th { font-size: 10px; font-weight: 700; color: #94A3B8; text-transform: uppercase; letter-spacing: .08em; }
     .th.center { text-align: center; }
 
     .trow {
-      display: grid; grid-template-columns: 28px 38px 1fr 100px 90px 70px;
+      display: grid; grid-template-columns: 28px 38px 1fr 120px 90px 70px;
       padding: 12px 16px; border-bottom: 1px solid #F1F5F9; align-items: center;
       transition: background .12s, transform .1s; animation: fadeIn .28s ease both; cursor: pointer;
     }
@@ -85,6 +108,16 @@
     .trow:hover { background: #F0F7FF; transform: translateX(2px); }
     .trow.selected { background: #EFF6FF; }
     .trow.selected:hover { background: #DBEAFE; }
+
+    /* type group divider */
+    .group-header {
+      padding: 7px 16px 5px;
+      font-size: 10px; font-weight: 700; letter-spacing: .08em;
+      text-transform: uppercase; color: #94A3B8;
+      background: #F8FAFC; border-bottom: 1px solid #F1F5F9;
+      display: flex; align-items: center; gap: 6px;
+    }
+    .group-line { flex: 1; height: 1px; background: #E2E8F0; }
 
     .row-check {
       width: 15px; height: 15px; border-radius: 4px; border: 1.5px solid #CBD5E1;
@@ -112,6 +145,7 @@
     .duty-HR    { background: #DBEAFE; color: #1D4ED8; }
     .duty-Admin { background: #FEF3C7; color: #92400E; }
 
+    /* ── Footer ── */
     .tfoot {
       display: flex; justify-content: space-between; align-items: center;
       padding: 10px 16px; background: #F8FAFC; border-top: 1.5px solid #E2E8F0;
@@ -121,6 +155,7 @@
     .tfoot-count { display: flex; align-items: center; gap: 4px; }
     .tfoot-dot { width: 7px; height: 7px; border-radius: 50%; }
 
+    /* selection bar */
     .sel-bar {
       display: none; align-items: center; justify-content: space-between;
       padding: 7px 16px; background: #EFF6FF; border-bottom: 1px solid #BFDBFE;
@@ -145,6 +180,7 @@
 </head>
 <body>
 
+  <!-- Header -->
   <div class="header">
     <div class="header-left">
       <div class="header-icon">
@@ -166,7 +202,15 @@
     </button>
   </div>
 
-  <div class="cards">
+  <!-- Cards row: BIG All + 5 frequency cards -->
+  <div class="cards-row">
+    <!-- ALL card -->
+    <div class="card-all active" id="card-All" onclick="setFilter('All')">
+      <div class="card-all-label">All Tasks</div>
+      <div class="card-all-count" id="count-All">0</div>
+      <div class="card-all-sub">total records</div>
+    </div>
+    <!-- Frequency cards -->
     <div class="card" id="card-Daily"   style="--color:#2563EB;--accent:#BFDBFE;--bg:#EFF6FF" onclick="setFilter('Daily')">
       <div class="card-label">Daily</div><div class="card-count" id="count-Daily">0</div><div class="card-sub">tasks</div>
     </div>
@@ -184,16 +228,9 @@
     </div>
   </div>
 
-  <div class="filters">
-    <div class="pill active" id="pill-All"     style="--color:#0F172A" onclick="setFilter('All')">All</div>
-    <div class="pill"        id="pill-Daily"   style="--color:#2563EB" onclick="setFilter('Daily')">Daily <span class="badge" id="badge-Daily">0</span></div>
-    <div class="pill"        id="pill-Weekly"  style="--color:#7C3AED" onclick="setFilter('Weekly')">Weekly <span class="badge" id="badge-Weekly">0</span></div>
-    <div class="pill"        id="pill-Monthly" style="--color:#059669" onclick="setFilter('Monthly')">Monthly <span class="badge" id="badge-Monthly">0</span></div>
-    <div class="pill"        id="pill-Yearly"  style="--color:#DC2626" onclick="setFilter('Yearly')">Yearly <span class="badge" id="badge-Yearly">0</span></div>
-    <div class="pill"        id="pill-Adhoc"   style="--color:#D97706" onclick="setFilter('Adhoc')">Adhoc <span class="badge" id="badge-Adhoc">0</span></div>
-  </div>
-
+  <!-- Table -->
   <div class="table-wrap">
+    <!-- Selection bar -->
     <div class="sel-bar" id="sel-bar">
       <span id="sel-label">0 rows selected</span>
       <div class="sel-bar-actions">
@@ -232,15 +269,14 @@
     };
     const ALL_FREQS = ['Daily', 'Weekly', 'Monthly', 'Yearly', 'Adhoc'];
 
-    let allRecords  = [];
+    let allRecords   = [];
     let activeFilter = 'All';
     let selectedIds  = new Set();
-    let currentPosition = ''; // from linked row
+    let currentPosition = '';
 
-    // ── Grist hooks ───────────────────────────────────────────────────
+    // ── Grist ─────────────────────────────────────────────────────────
     grist.ready({ requiredAccess: 'read table' });
 
-    // All records in the table
     grist.onRecords(function(records) {
       allRecords = records;
       selectedIds.clear();
@@ -248,23 +284,11 @@
       render();
     });
 
-    // Currently selected/linked row from the Position table on the left
     grist.onRecord(function(record) {
-      if (!record) { currentPosition = ''; }
-      else {
-        // Try common column name variations for the position name
-        currentPosition =
-          record.Position ||
-          record.position ||
-          record.Name     ||
-          record.name     ||
-          record.Title    ||
-          record.title    ||
-          '';
-      }
-      // Update the position tag in the header
-      const tag = document.getElementById('position-tag');
-      tag.textContent = currentPosition || 'All Positions';
+      currentPosition = record
+        ? (record.Position || record.position || record.Name || record.name || record.Title || record.title || '')
+        : '';
+      document.getElementById('position-tag').textContent = currentPosition || 'All Positions';
     });
 
     // ── Filter ────────────────────────────────────────────────────────
@@ -272,27 +296,39 @@
       if (f !== 'All' && activeFilter === f) f = 'All';
       activeFilter = f;
       selectedIds.clear();
-      updatePillsAndCards();
+      updateCards();
       render();
     }
 
     function getVisibleRows() {
-      return activeFilter === 'All' ? allRecords : allRecords.filter(r => r.Frequency === activeFilter);
+      const rows = activeFilter === 'All' ? [...allRecords] : allRecords.filter(r => r.Frequency === activeFilter);
+      // Sort by Type (Duty_Type) then by Scope
+      rows.sort((a, b) => {
+        const typeA  = (a.Duty_Type || a.DutyType || a['Duty Type'] || '').toLowerCase();
+        const typeB  = (b.Duty_Type || b.DutyType || b['Duty Type'] || '').toLowerCase();
+        const scopeA = (a.Scope || '').toLowerCase();
+        const scopeB = (b.Scope || '').toLowerCase();
+        if (typeA < typeB) return -1;
+        if (typeA > typeB) return 1;
+        if (scopeA < scopeB) return -1;
+        if (scopeA > scopeB) return 1;
+        return 0;
+      });
+      return rows;
     }
 
     function updateCounts() {
+      document.getElementById('count-All').textContent = allRecords.length;
       ALL_FREQS.forEach(f => {
         const n = allRecords.filter(r => r.Frequency === f).length;
         document.getElementById('count-' + f).textContent = n;
-        document.getElementById('badge-' + f).textContent = n;
       });
     }
 
-    function updatePillsAndCards() {
-      ['All', ...ALL_FREQS].forEach(f => {
-        const pill = document.getElementById('pill-' + f);
-        if (pill) pill.classList.toggle('active', activeFilter === f);
-      });
+    function updateCards() {
+      // All card
+      document.getElementById('card-All').classList.toggle('active', activeFilter === 'All');
+      // Frequency cards
       ALL_FREQS.forEach(f => {
         const card = document.getElementById('card-' + f);
         if (card) card.classList.toggle('active', activeFilter === f);
@@ -342,9 +378,8 @@
       });
     }
 
-    // ── Excel filename helper ─────────────────────────────────────────
+    // ── Excel filename ────────────────────────────────────────────────
     function buildFilename(mode) {
-      // Sanitise position name: replace spaces/special chars with hyphens
       const pos   = (currentPosition || 'position').replace(/[^a-zA-Z0-9]+/g, '-').replace(/^-+|-+$/g, '');
       const freq  = activeFilter === 'All' ? 'all' : activeFilter.toLowerCase();
       const suffix = mode === 'selected' ? 'selected' : 'current';
@@ -363,25 +398,24 @@
       const data = toExport.map((r, i) => ({
         '#':           i + 1,
         'Position':    currentPosition || '',
-        'Description': r.Description || '',
+        'Type':        r.Duty_Type || r.DutyType || r['Duty Type'] || '',
         'Scope':       r.Scope || '',
+        'Description': r.Description || '',
         'Frequency':   r.Frequency || '',
-        'Duty Type':   r.Duty_Type || r.DutyType || r['Duty Type'] || '',
       }));
 
       const wb = XLSX.utils.book_new();
       const ws = XLSX.utils.json_to_sheet(data);
 
       ws['!cols'] = [
-        { wch: 4  },  // #
-        { wch: 28 },  // Position
-        { wch: 68 },  // Description
-        { wch: 18 },  // Scope
-        { wch: 12 },  // Frequency
-        { wch: 12 },  // Duty Type
+        { wch: 4  },
+        { wch: 28 },
+        { wch: 10 },
+        { wch: 18 },
+        { wch: 68 },
+        { wch: 12 },
       ];
 
-      // Bold header row
       const range = XLSX.utils.decode_range(ws['!ref']);
       for (let C = range.s.c; C <= range.e.c; C++) {
         const cell = ws[XLSX.utils.encode_cell({ r: 0, c: C })];
@@ -394,11 +428,10 @@
         }
       }
 
-      const sheetName = (currentPosition || 'Tasks').substring(0, 31); // Excel sheet name max 31 chars
+      const sheetName = (currentPosition || 'Tasks').substring(0, 31);
       XLSX.utils.book_append_sheet(wb, ws, sheetName);
       XLSX.writeFile(wb, buildFilename(mode));
 
-      // Flash button green
       const btn = mode === 'selected'
         ? document.querySelector('.sel-dl-btn')
         : document.getElementById('main-dl-btn');
@@ -422,15 +455,32 @@
         return;
       }
 
-      tbody.innerHTML = rows.map((r, i) => {
+      let html = '';
+      let lastType = null;
+      let rowNum = 0;
+
+      rows.forEach((r, i) => {
         const freq = r.Frequency || '';
         const cfg  = FREQ_CFG[freq] || { color: '#64748B', accent: '#E2E8F0', bg: '#F8FAFC' };
         const duty = r.Duty_Type || r.DutyType || r['Duty Type'] || '';
         const sel  = selectedIds.has(r.id);
 
-        return `
+        // Insert group header when Type changes
+        if (duty !== lastType) {
+          html += `
+            <div class="group-header">
+              <span>${duty || 'Uncategorised'}</span>
+              <span class="group-line"></span>
+            </div>`;
+          lastType = duty;
+          rowNum = 0; // reset row number per group (or keep global — your choice)
+        }
+
+        rowNum++;
+
+        html += `
           <div class="trow${sel ? ' selected' : ''}" data-id="${r.id}"
-               style="animation-delay:${i * 0.03}s" onclick="toggleRow(${r.id})">
+               style="animation-delay:${i * 0.025}s" onclick="toggleRow(${r.id})">
             <div class="row-check">${sel ? CHECK_SVG : ''}</div>
             <div class="td-num">${String(i + 1).padStart(2, '0')}</div>
             <div class="td-desc">${esc(r.Description || '')}</div>
@@ -442,7 +492,9 @@
             </div>
             <div><span class="duty-badge duty-${esc(duty)}">${esc(duty)}</span></div>
           </div>`;
-      }).join('');
+      });
+
+      tbody.innerHTML = html;
 
       document.getElementById('footer-total').textContent =
         `Showing ${rows.length} of ${allRecords.length} task${allRecords.length !== 1 ? 's' : ''}`;
